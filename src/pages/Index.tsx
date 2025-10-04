@@ -1,10 +1,11 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { TodayDashboard } from "@/components/dashboard/TodayDashboard";
 import { CalendarView } from "@/components/calendar/CalendarView";
 import { AnalyticsView } from "@/components/analytics/AnalyticsView";
 import { NewTradeDialog } from "@/components/trade/NewTradeDialog";
 import { Header } from "@/components/layout/Header";
-import { Calendar, BarChart3, Home } from "lucide-react";
+import { Calendar, BarChart3, Home, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 type View = "today" | "calendar" | "analytics";
@@ -12,6 +13,7 @@ type View = "today" | "calendar" | "analytics";
 const Index = () => {
   const [currentView, setCurrentView] = useState<View>("today");
   const [isNewTradeOpen, setIsNewTradeOpen] = useState(false);
+  const navigate = useNavigate();
 
   const renderView = () => {
     switch (currentView) {
@@ -64,6 +66,16 @@ const Index = () => {
             >
               <BarChart3 className="h-5 w-5" />
               <span className="text-xs">Analytics</span>
+            </Button>
+            
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate("/challenges")}
+              className="flex flex-col items-center gap-1"
+            >
+              <Trophy className="h-5 w-5" />
+              <span className="text-xs">Challenges</span>
             </Button>
           </div>
         </div>
