@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
 import { TrendingUp, TrendingDown, Plus } from "lucide-react";
-// import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client";
 import { SymbolPicker } from "./SymbolPicker";
 import { ResultSlider } from "./ResultSlider";
 import { AudioRecorder } from "./AudioRecorder";
@@ -62,10 +62,73 @@ export const NewTradeDialog = ({ open, onOpenChange }: NewTradeDialogProps) => {
     setIsSubmitting(true);
 
     try {
-      // TODO: Backend integration pending
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast({
+          title: "Authentication Required",
+          description: "Please sign in to log trades",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      let audioUrl = null;
+      let imageUrl = null;
+
+      // Upload audio if present
+      if (audioFile) {
+        const audioFileName = `${user.id}/${Date.now()}_audio.webm`;
+        const { error: audioError } = await supabase.storage
+          .from("trade-audio")
+          .upload(audioFileName, audioFile.blob);
+
+        if (audioError) throw audioError;
+
+        const { data: audioData } = supabase.storage
+          .from("trade-audio")
+          .getPublicUrl(audioFileName);
+        
+        audioUrl = audioData.publicUrl;
+      }
+
+      // Upload image if present
+      if (imageFile) {
+        const imageFileName = `${user.id}/${Date.now()}_${imageFile.name}`;
+        const { error: imageError } = await supabase.storage
+          .from("trade-images")
+          .upload(imageFileName, imageFile);
+
+        if (imageError) throw imageError;
+
+        const { data: imageData } = supabase.storage
+          .from("trade-images")
+          .getPublicUrl(imageFileName);
+        
+        imageUrl = imageData.publicUrl;
+      }
+
+      // Save trade to database
+      const { error: dbError } = await supabase.from("trades").insert({
+        user_id: user.id,
+        symbol: formData.symbol,
+        direction: formData.direction,
+        entry: formData.entry ? parseFloat(formData.entry) : null,
+        exit: formData.exit ? parseFloat(formData.exit) : null,
+        size: formData.size ? parseFloat(formData.size) : null,
+        pnl: parseFloat(formData.pnl),
+        result: formData.result,
+        notes: formData.notes,
+        audio_url: audioUrl,
+        image_url: imageUrl,
+        audio_duration: audioFile?.duration || null,
+      });
+
+      if (dbError) throw dbError;
+
       toast({
         title: "Trade Logged!",
-        description: `${formData.symbol} trade saved successfully (demo mode)`,
+        description: `${formData.symbol} trade saved successfully`,
       });
 
       // Reset form and close dialog
