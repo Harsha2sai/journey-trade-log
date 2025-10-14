@@ -5,13 +5,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useToast } from "@/hooks/use-toast";
 import { TrendingUp, TrendingDown, Plus } from "lucide-react";
-// import { supabase } from "@/integrations/supabase/client";
 import { SymbolPicker } from "./SymbolPicker";
 import { ResultSlider } from "./ResultSlider";
 import { AudioRecorder } from "./AudioRecorder";
 import { ImageAttachment } from "./ImageAttachment";
+import { useTradeForm } from "@/hooks/useTradeForm";
+import type { TradeDirection, TradeResult } from "@/types";
 
 interface NewTradeDialogProps {
   open: boolean;
@@ -19,85 +19,19 @@ interface NewTradeDialogProps {
 }
 
 export const NewTradeDialog = ({ open, onOpenChange }: NewTradeDialogProps) => {
-  const { toast } = useToast();
   const [isSymbolPickerOpen, setIsSymbolPickerOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [audioFile, setAudioFile] = useState<{ blob: Blob; duration: number } | null>(null);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  
-  const [formData, setFormData] = useState({
-    symbol: "",
-    direction: "long" as "long" | "short",
-    entry: "",
-    exit: "",
-    size: "",
-    pnl: "",
-    result: "win" as "win" | "loss" | "breakeven",
-    notes: "",
-  });
 
-  const handleImageSelect = (file: File) => {
-    setImageFile(file);
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setImagePreview(reader.result as string);
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Validation
-    if (!formData.symbol || !formData.pnl) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill in at least the symbol and P&L",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
-      // TODO: Backend integration pending
-      toast({
-        title: "Trade Logged!",
-        description: `${formData.symbol} trade saved successfully (demo mode)`,
-      });
-
-      // Reset form and close dialog
-      resetForm();
-      onOpenChange(false);
-    } catch (error) {
-      console.error("Error saving trade:", error);
-      toast({
-        title: "Error",
-        description: "Failed to save trade. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const resetForm = () => {
-    setFormData({
-      symbol: "",
-      direction: "long",
-      entry: "",
-      exit: "",
-      size: "",
-      pnl: "",
-      result: "win",
-      notes: "",
-    });
-    setAudioFile(null);
-    setImageFile(null);
-    setImagePreview(null);
-  };
+  const {
+    formData,
+    setFormData,
+    audioFile,
+    setAudioFile,
+    imagePreview,
+    handleImageSelect,
+    isSubmitting,
+    handleSubmit,
+    resetForm,
+  } = useTradeForm(() => onOpenChange(false));
 
   return (
     <>
@@ -141,7 +75,7 @@ export const NewTradeDialog = ({ open, onOpenChange }: NewTradeDialogProps) => {
               <Label>Direction</Label>
               <RadioGroup
                 value={formData.direction}
-                onValueChange={(value) => setFormData({ ...formData, direction: value as "long" | "short" })}
+                onValueChange={(value) => setFormData({ ...formData, direction: value as TradeDirection })}
                 className="flex gap-4"
               >
                 <div className="flex items-center space-x-2 flex-1">
@@ -217,7 +151,7 @@ export const NewTradeDialog = ({ open, onOpenChange }: NewTradeDialogProps) => {
             {/* Result Slider */}
             <ResultSlider
               value={formData.result}
-              onChange={(value) => setFormData({ ...formData, result: value })}
+              onChange={(value) => setFormData({ ...formData, result: value as TradeResult })}
             />
 
             {/* Notes */}
@@ -243,10 +177,7 @@ export const NewTradeDialog = ({ open, onOpenChange }: NewTradeDialogProps) => {
                 />
                 <ImageAttachment
                   onImageSelected={handleImageSelect}
-                  onRemove={() => {
-                    setImageFile(null);
-                    setImagePreview(null);
-                  }}
+                  onRemove={() => handleImageSelect(null as any)}
                   previewUrl={imagePreview}
                 />
               </div>

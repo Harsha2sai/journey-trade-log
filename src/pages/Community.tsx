@@ -1,21 +1,13 @@
 import { Header } from "@/components/layout/Header";
-import { Users, MessageSquare, TrendingUp, Award } from "lucide-react";
+import { Users, MessageSquare, Award } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { MOCK_TOP_TRADERS, MOCK_DISCUSSIONS } from "@/constants/mockData";
 
 const Community = () => {
-  const topTraders = [
-    { name: "Alex Chen", winRate: 78, trades: 342, avatar: "AC" },
-    { name: "Sarah Miller", winRate: 74, trades: 289, avatar: "SM" },
-    { name: "Mike Johnson", winRate: 71, trades: 256, avatar: "MJ" },
-  ];
-
-  const recentDiscussions = [
-    { title: "Best strategy for EUR/USD?", author: "John Doe", replies: 23 },
-    { title: "Managing risk in volatile markets", author: "Jane Smith", replies: 18 },
-    { title: "Technical analysis tips", author: "Bob Wilson", replies: 15 },
-  ];
+  const topTraders = MOCK_TOP_TRADERS;
+  const recentDiscussions = MOCK_DISCUSSIONS;
 
   return (
     <div className="min-h-screen bg-background">

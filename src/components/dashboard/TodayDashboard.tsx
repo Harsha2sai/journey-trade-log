@@ -3,24 +3,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { MOCK_DASHBOARD_STATS, MOCK_TODAY_TRADES } from "@/constants/mockData";
 
 interface TodayDashboardProps {
   onNewTrade: () => void;
 }
 
 export const TodayDashboard = ({ onNewTrade }: TodayDashboardProps) => {
-  // Mock data - will be replaced with real data
-  const todayPnL = 245.50;
-  const todayTrades = 3;
-  const winRate = 66.7;
-  const weeklyGoal = 500;
+  const { todayPnL, todayTrades, winRate, weeklyGoal } = MOCK_DASHBOARD_STATS;
   const weeklyProgress = (todayPnL / weeklyGoal) * 100;
-
-  const recentTrades = [
-    { id: 1, symbol: "EUR/USD", pnl: 120, win: true, time: "14:23" },
-    { id: 2, symbol: "GBP/JPY", pnl: -45, win: false, time: "12:15" },
-    { id: 3, symbol: "USD/JPY", pnl: 170.50, win: true, time: "09:42" },
-  ];
+  const recentTrades = MOCK_TODAY_TRADES;
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
